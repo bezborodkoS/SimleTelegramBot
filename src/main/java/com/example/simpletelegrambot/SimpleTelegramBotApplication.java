@@ -12,7 +12,6 @@ public class SimpleTelegramBotApplication {
     public static void main(String[] args) {
         SpringApplication.run(SimpleTelegramBotApplication.class, args);
 
-
         TelegramBot telegramBot = new TelegramBot();
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession. class );
