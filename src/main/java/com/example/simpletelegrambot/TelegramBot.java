@@ -1,16 +1,25 @@
 package com.example.simpletelegrambot;
 
+
+//import com.example.simpletelegrambot.service.CalculatorService;
+
+import com.example.simpletelegrambot.dto.CreditSettingDTO;
+import com.example.simpletelegrambot.service.CalculatorService;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
 public class TelegramBot extends TelegramLongPollingBot {
+
+    private CalculatorService calculatorService;
+    private boolean expectingUserData = false;
     private int numb1 = 0;
     private int numb2 = 0;
     private boolean gameRunning = false;
@@ -18,26 +27,26 @@ public class TelegramBot extends TelegramLongPollingBot {
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 
-
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String answer = update.getMessage().getText();
-            System.out.println(answer + " answer");
             long chat_id = update.getMessage().getChatId();
-            switch (answer.toLowerCase()) {
-                case "/игра":
-                    startGame(chat_id);
-                    break;
-                case "/стоп":
-                    stopGame(chat_id);
-                    break;
-                default:
-                    sendMessage(chat_id, answer);
+            if (answer.toLowerCase().equals("/игра")) {
+                startGame(chat_id);
+            } else if (answer.toLowerCase().equals("/стоп")) {
+                stopGame(chat_id);
+            } else if (answer.toLowerCase().equals("/form")) {
+                expectingUserData = true;
+                sendMessage(chat_id, "Пожалуйста, введите ваши данные в формате:\nСалон, Стоимость машины, Депозит, Сколько вы хотите платить");
+            } else if (expectingUserData) {
+                processUserData(answer, chat_id);
+                expectingUserData = false;          // Сброс ожидания после получения данных
+            } else {
+                sendMessage(chat_id, "Неверная команда. Введите /form, /игра, /стоп для начала.");
             }
         }
     }
-
 
 
     private void startGame(long chatId) {
@@ -72,6 +81,28 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+
+    private void processUserData(String userData, long chat_id) {
+        String[] data = userData.split(",");
+        if (data.length == 4) {
+            String autoDealer = data[0].trim();
+            double costCar = Double.parseDouble(data[1].trim());
+            double deposit = Double.parseDouble(data[2].trim());
+            double wantPayInMonth = Double.parseDouble(data[3].trim());
+
+            ArrayList<CreditSettingDTO> creditSettingDTOArrayList = new CalculatorService().canBuyCar(costCar, deposit, wantPayInMonth, autoDealer);
+            for (CreditSettingDTO credit : creditSettingDTOArrayList) {
+                sendMessage(chat_id, credit.toString());
+            }
+            // Обработка и сохранение данных
+            sendMessage(chat_id, "Данные получены:\nСалон: " + autoDealer + "\nСтоимость машины: " + costCar + "\nДепозит: " + deposit + "\nСколько вы хотите платить " + wantPayInMonth);
+        } else {
+            sendMessage(chat_id, "Пожалуйста, введите данные в правильном формате.");
+        }
+//        expectingUserData=false;
+    }
+
+
     private void sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
@@ -85,8 +116,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
 
-
-
     @Override
     public String getBotUsername() {
         return "Simple_qwerty_bot";
@@ -97,6 +126,5 @@ public class TelegramBot extends TelegramLongPollingBot {
         return "6923161415:AAHD3O9d1yZyzkpAavY9fu9JSgNQ4jNMvJs";
 
     }
-
 
 }
