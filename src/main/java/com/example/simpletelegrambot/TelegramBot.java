@@ -32,9 +32,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String answer = update.getMessage().getText();
             long chat_id = update.getMessage().getChatId();
-            if (answer.toLowerCase().equals("/игра")) {
+            sendMessage(chat_id,"/game -> запустить игру с числами\n /stop -> остановить игру\n/form -> отправить запрос на калькулятор кредита автомобиля");
+            if (answer.toLowerCase().equals("/game")) {
                 startGame(chat_id);
-            } else if (answer.toLowerCase().equals("/стоп")) {
+            } else if (answer.toLowerCase().equals("/stop")) {
                 stopGame(chat_id);
             } else if (answer.toLowerCase().equals("/form")) {
                 expectingUserData = true;
@@ -91,6 +92,14 @@ public class TelegramBot extends TelegramLongPollingBot {
             double wantPayInMonth = Double.parseDouble(data[3].trim());
 
             ArrayList<CreditSettingDTO> creditSettingDTOArrayList = new CalculatorService().canBuyCar(costCar, deposit, wantPayInMonth, autoDealer);
+            double wantPayInMonthUsing= wantPayInMonth;
+            if (creditSettingDTOArrayList.size()==0){
+                do {
+                    wantPayInMonthUsing+=1000;
+                    creditSettingDTOArrayList = new CalculatorService().canBuyCar(costCar, deposit, wantPayInMonthUsing, autoDealer);
+                }while (creditSettingDTOArrayList.size()==0);
+                sendMessage(chat_id, "Никаких вариантов не найденою минимальный месячный платеж: "+wantPayInMonthUsing);
+            }
             for (CreditSettingDTO credit : creditSettingDTOArrayList) {
                 sendMessage(chat_id, credit.toString());
             }

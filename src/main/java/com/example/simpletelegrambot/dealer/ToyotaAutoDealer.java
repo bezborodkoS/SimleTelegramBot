@@ -11,6 +11,12 @@ public class ToyotaAutoDealer {
     private CarDealer carDealer;
 
     public ToyotaAutoDealer() {
+
+        List<Double> additionalExpenses = new ArrayList<>();
+        additionalExpenses.add(2.99);
+        additionalExpenses.add(1.99);
+
+
         List<CreditSetting> creditSettingsPrivat = new ArrayList<>();
         creditSettingsPrivat.add(new CreditSetting(12,30,3.49));
         creditSettingsPrivat.add(new CreditSetting(24,30,6.99));
@@ -42,7 +48,7 @@ public class ToyotaAutoDealer {
         creditSettingsPrivat.add(new CreditSetting(48,70,9.99));
         creditSettingsPrivat.add(new CreditSetting(60,70,9.99));
 
-        Bank privat = new Bank("PrivatBank",creditSettingsPrivat);
+        Bank privat = new Bank("PrivatBank",creditSettingsPrivat,additionalExpenses);
         this.carDealer = new CarDealer(null,null);
         this.carDealer.setNameCarDealer("toyota");
         this.carDealer.setBanks(new ArrayList<>());

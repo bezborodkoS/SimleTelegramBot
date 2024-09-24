@@ -9,9 +9,12 @@ public class Bank {
 
     private List<CreditSetting> creditSettings;
 
-    public Bank(String nameBank, List<CreditSetting> creditSettings) {
+    private List<Double> additionalExpenses;
+
+    public Bank(String nameBank, List<CreditSetting> creditSettings,List<Double> additionalExpenses) {
         this.nameBank = nameBank;
         this.creditSettings = creditSettings;
+        this.additionalExpenses = additionalExpenses;
     }
 
     public String getNameBank() {
@@ -20,6 +23,14 @@ public class Bank {
 
     public List<CreditSetting> getCreditSettings() {
         return creditSettings;
+    }
+
+    public List<Double> getAdditionalExpenses() {
+        return additionalExpenses;
+    }
+
+    public void setAdditionalExpenses(List<Double> additionalExpenses) {
+        this.additionalExpenses = additionalExpenses;
     }
 
     public void setNameBank(String nameBank) {

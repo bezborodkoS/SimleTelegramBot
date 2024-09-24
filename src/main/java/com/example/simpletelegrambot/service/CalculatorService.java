@@ -37,7 +37,8 @@ public class CalculatorService {
     //    поиск подходящих кредитов
     private static ArrayList<CreditSettingDTO> takeAllSettingsInNeadAutoDealer(String nameAutoDealer, double wantPay, double costCar, double deposit, int calculatePercentDeposit) {
         ArrayList<CreditSettingDTO> creditSettingDtoList = new ArrayList<>();
-        double costCarAfterPayDeposit = calculateCostCarAfterPayDeposit(costCar, deposit);
+        double costCarAfterPayDeposit = 0;
+
 //        int calculPercentDeposit =
         List<Bank> banks = null;
         if (nameAutoDealer.toLowerCase().equals("toyota")) {
@@ -50,10 +51,13 @@ public class CalculatorService {
             System.out.println(banks.size());
         }
         for (Bank bank : banks) {
+
+            costCarAfterPayDeposit = calculateCostCarAfterPayDeposit(calculateCostCarWithAdditionalExpenses(costCar,bank), deposit);
+
             for (int i = 0; i < bank.getCreditSettings().size(); i++) {
                     double calculateMonthlyPayment = calculateMonthlyPayment(bank.getCreditSettings().get(i), costCarAfterPayDeposit);
                     if (wantPay >= calculateMonthlyPayment && bank.getCreditSettings().get(i).getPercentDeposit() == calculatePercentDeposit) {
-                        CreditSettingDTO creditSettingDto = new CreditSettingDTO().convertCreditSettingToDTO(bank.getCreditSettings().get(i), nameAutoDealer);
+                        CreditSettingDTO creditSettingDto = new CreditSettingDTO().convertCreditSettingToDTO(bank.getCreditSettings().get(i), bank.getNameBank());
                         creditSettingDto.setMonthlyPayment(calculateMonthlyPayment);
                         creditSettingDtoList.add(creditSettingDto);
                     }
@@ -95,6 +99,16 @@ public class CalculatorService {
                 }
             }
         }
+        if (nameAutoDealer.toLowerCase().equals("mazda")) {
+            ToyotaAutoDealer toyotaAutoDealer = new ToyotaAutoDealer();
+            List<Bank> banks = toyotaAutoDealer.getCarDealer().getBanks();
+
+            for (Bank bank : banks) {
+                for (CreditSetting creditSetting : bank.getCreditSettings()) {
+                    creditSettingList.add(creditSetting);
+                }
+            }
+        }
         return (ArrayList<CreditSetting>) creditSettingList;
     }
 
@@ -106,5 +120,13 @@ public class CalculatorService {
     //    расчитать оставшуюся стоимость машины после вычета депозита
     private static double calculateCostCarAfterPayDeposit(Double costCar, Double deposit) {
         return costCar - deposit;
+    }
+
+    private static double calculateCostCarWithAdditionalExpenses(Double costCar,Bank bank){
+        double costCarWithAdditionalExpenses = costCar;
+        for (double d : bank.getAdditionalExpenses()) {
+            costCarWithAdditionalExpenses+= (costCar/100)*d;
+        }
+        return costCarWithAdditionalExpenses+750;
     }
 }
