@@ -98,7 +98,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     wantPayInMonthUsing+=1000;
                     creditSettingDTOArrayList = new CalculatorService().canBuyCar(costCar, deposit, wantPayInMonthUsing, autoDealer);
                 }while (creditSettingDTOArrayList.size()==0);
-                sendMessage(chat_id, "Никаких вариантов не найденою минимальный месячный платеж: "+wantPayInMonthUsing);
+                sendMessage(chat_id, "Никаких вариантов не найденою. Минимальный месячный платеж: "+wantPayInMonthUsing);
             }
             for (CreditSettingDTO credit : creditSettingDTOArrayList) {
                 sendMessage(chat_id, credit.toString());
