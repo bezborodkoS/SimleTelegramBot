@@ -1,7 +1,8 @@
 package com.example.simpletelegrambot.model;
 
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class CreditSetting {
 
     private Integer month;
@@ -43,12 +44,16 @@ public class CreditSetting {
         this.percent = percent;
     }
 
-    @Override
-    public String toString() {
-        return "CreditSetting{" +
-                ", month=" + month +
-                ", percentDeposit=" + percentDeposit +
-                ", percent=" + percent +
-                '}';
+    //    public Bank getBank() {
+//        return bank;
+//    }
+//
+//    public void setBank(Bank bank) {
+//        this.bank = bank;
+//    }
+
+
+    public String buttonSettings() {
+        return month +" "+ percentDeposit +"% " + percent;
     }
 }

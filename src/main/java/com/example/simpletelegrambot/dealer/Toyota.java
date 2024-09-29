@@ -1,23 +1,26 @@
 package com.example.simpletelegrambot.dealer;
 
 import com.example.simpletelegrambot.model.Bank;
-import com.example.simpletelegrambot.model.CarDealer;
 import com.example.simpletelegrambot.model.CreditSetting;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ToyotaAutoDealer {
-    private CarDealer carDealer;
+@Component
+public class Toyota extends AutoDealer {
+    public Toyota() {
+        this.nameAutoDealer = "Toyota";
+        this.bankList = banksToyota();
+    }
 
-    public ToyotaAutoDealer() {
+    private List<Bank> banksToyota(){
 
+        List<CreditSetting> creditSettingsPrivat = new ArrayList<>();
         List<Double> additionalExpenses = new ArrayList<>();
         additionalExpenses.add(2.99);
         additionalExpenses.add(1.99);
 
-
-        List<CreditSetting> creditSettingsPrivat = new ArrayList<>();
         creditSettingsPrivat.add(new CreditSetting(12,30,3.49));
         creditSettingsPrivat.add(new CreditSetting(24,30,6.99));
         creditSettingsPrivat.add(new CreditSetting(36,30,8.99));
@@ -48,14 +51,13 @@ public class ToyotaAutoDealer {
         creditSettingsPrivat.add(new CreditSetting(48,70,9.99));
         creditSettingsPrivat.add(new CreditSetting(60,70,9.99));
 
-        Bank privat = new Bank("PrivatBank",creditSettingsPrivat,additionalExpenses);
-        this.carDealer = new CarDealer(null,null);
-        this.carDealer.setNameCarDealer("toyota");
-        this.carDealer.setBanks(new ArrayList<>());
-        this.carDealer.getBanks().add(privat);
-    }
 
-    public CarDealer getCarDealer() {
-        return carDealer;
+        Bank privatBank = new Bank();
+        privatBank.setNameBank("PrivatBank");
+        privatBank.setCreditSettings(creditSettingsPrivat);
+        privatBank.setAdditionalExpenses(additionalExpenses);
+        List<Bank> toyotaBanks = new ArrayList<>();
+        toyotaBanks.add(privatBank);
+        return toyotaBanks;
     }
 }

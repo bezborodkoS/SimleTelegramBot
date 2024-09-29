@@ -1,16 +1,18 @@
 package com.example.simpletelegrambot;
 
 
-//import com.example.simpletelegrambot.service.CalculatorService;
-
+import ch.qos.logback.core.util.COWArrayList;
 import com.example.simpletelegrambot.dto.CreditSettingDTO;
 import com.example.simpletelegrambot.service.CalculatorService;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +22,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private CalculatorService calculatorService;
     private boolean expectingUserData = false;
+    private boolean expectingAllSettings = false;
     private int numb1 = 0;
     private int numb2 = 0;
     private boolean gameRunning = false;
@@ -32,7 +35,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String answer = update.getMessage().getText();
             long chat_id = update.getMessage().getChatId();
-            sendMessage(chat_id,"/game -> запустить игру с числами\n /stop -> остановить игру\n/form -> отправить запрос на калькулятор кредита автомобиля");
+            sendMessage(chat_id,"/game -> запустить игру с числами\n /stop -> остановить игру\n/form -> отправить запрос на калькулятор кредита автомобиля\n/allsettings -> allSettings");
             if (answer.toLowerCase().equals("/game")) {
                 startGame(chat_id);
             } else if (answer.toLowerCase().equals("/stop")) {
@@ -43,9 +46,48 @@ public class TelegramBot extends TelegramLongPollingBot {
             } else if (expectingUserData) {
                 processUserData(answer, chat_id);
                 expectingUserData = false;          // Сброс ожидания после получения данных
+            }else if (answer.toLowerCase().equals("/allsettings")) {
+                expectingAllSettings = true;
+                sendMessage(chat_id, "Пожалуйста, введите ваши данные в формате:Салон");
+            }else if (expectingAllSettings) {
+                sendButtons(chat_id, answer);
+                expectingAllSettings = false;          // Сброс ожидания после получения данных
             } else {
                 sendMessage(chat_id, "Неверная команда. Введите /form, /игра, /стоп для начала.");
             }
+        }
+    }
+
+    private void sendButtons(long chatId, String text) {
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(text);
+        System.out.println(text+" text");
+
+        // Создание сетки кнопок из коллекции
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        System.out.println("cone/////");
+        // Коллекция с кнопками
+        List<String> buttonLabels = new CalculatorService().allSettings(text);
+        System.out.println(buttonLabels.size()+" button");
+        // Генерация кнопок
+        for (String label : buttonLabels) {
+            List<InlineKeyboardButton> rowInline = new ArrayList<>();
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(label);
+            button.setCallbackData(label); // CallbackData для обработки нажатия кнопки
+            rowInline.add(button);
+            rowsInline.add(rowInline);
+        }
+        // Устанавливаем кнопки в сообщение
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 
@@ -61,7 +103,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void stopGame(long chatId) {
+
+
+        private void stopGame(long chatId) {
         if (gameRunning) {
             gameRunning = false;
             scheduler.shutdownNow();

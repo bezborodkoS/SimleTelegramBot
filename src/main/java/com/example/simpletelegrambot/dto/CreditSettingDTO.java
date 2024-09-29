@@ -16,7 +16,7 @@ public class CreditSettingDTO {
     public CreditSettingDTO() {
     }
 
-    public CreditSettingDTO convertCreditSettingToDTO(CreditSetting creditSetting,String nameBank){
+    public CreditSettingDTO convertCreditSettingToDTO(CreditSetting creditSetting, String nameBank){
         CreditSettingDTO creditSettingDTO = new CreditSettingDTO();
         creditSettingDTO.setCountMonthInYear(creditSetting.getMonth());
         creditSettingDTO.setPercentDeposit(creditSetting.getPercentDeposit());
@@ -77,11 +77,25 @@ public class CreditSettingDTO {
 
     @Override
     public String toString() {
-        return "Количество месяцев=" + countMonthInYear +
+        return "TransformationToObj{" +
+                "Количество месяцев=" + countMonthInYear +
                 ", Разовая оплата от общей стоимости автомобиля=" + percentDeposit +
                 ", Процентная ставка в месяц=" + percent +
                 ", ежемесячный платеж=" + monthlyPayment +
-                ", банк='" + nameBank;
+                ", банк='" + nameBank +
+                '}';
     }
 
+
+    //    public TransformationToObj returnTransformation(Year year, double foundPercentDeposit){
+//        TransformationToObj transformationToObj = new TransformationToObj();
+//        for (Map.Entry<Integer, PercentDepositAllPercent> entry: year.getYear().entrySet()){
+//            transformationToObj.setCountMonthInYear(entry.getKey());
+//            for (Map.Entry<Integer, Double> percentDepositAllPercent: entry.getValue().getPercentDepositAllPercent().entrySet()) {
+//                transformationToObj.setPercentDeposit(percentDepositAllPercent.getKey());
+//                transformationToObj.setPercent(percentDepositAllPercent.getValue());
+//            }
+//        }
+//        return transformationToObj;
+//    }
 }

@@ -1,9 +1,10 @@
 package com.example.simpletelegrambot.service;
 
 
+import com.example.simpletelegrambot.dealer.AutoDealer;
+import com.example.simpletelegrambot.dealer.Mazda;
+import com.example.simpletelegrambot.dealer.Toyota;
 import com.example.simpletelegrambot.dto.CreditSettingDTO;
-import com.example.simpletelegrambot.dealer.MazdaAutoDealer;
-import com.example.simpletelegrambot.dealer.ToyotaAutoDealer;
 import com.example.simpletelegrambot.model.Bank;
 import com.example.simpletelegrambot.model.CreditSetting;
 
@@ -12,6 +13,15 @@ import java.util.List;
 
 public class CalculatorService {
 
+    public ArrayList<String> allSettings(String nameAutoDealer){
+        ArrayList<String> allSettings = new ArrayList<>();
+        for (Bank bank : getBanks(nameAutoDealer)) {
+            for (int i = 0; i < bank.getCreditSettings().size(); i++) {
+                allSettings.add(bank.getCreditSettings().get(i).buttonSettings());
+            }
+        }
+        return allSettings;
+    }
 
     //    start:  /buyCar
     //  покупка автомобиля с месячным платежом пользователя который он может себе позволить
@@ -40,30 +50,22 @@ public class CalculatorService {
         double costCarAfterPayDeposit = 0;
 
 //        int calculPercentDeposit =
-        List<Bank> banks = null;
-        if (nameAutoDealer.toLowerCase().equals("toyota")) {
-            ToyotaAutoDealer toyotaAutoDealer = new ToyotaAutoDealer();
-            banks = toyotaAutoDealer.getCarDealer().getBanks();
-        } else if (nameAutoDealer.toLowerCase().equals("mazda")) {
+        List<Bank> banks = getBanks(nameAutoDealer);
 
-            MazdaAutoDealer mazdaAutoDealer = new MazdaAutoDealer();
-            banks = mazdaAutoDealer.getCarDealer().getBanks();
-            System.out.println(banks.size());
-        }
         for (Bank bank : banks) {
 
-            costCarAfterPayDeposit = calculateCostCarAfterPayDeposit(calculateCostCarWithAdditionalExpenses(costCar,bank), deposit);
+            costCarAfterPayDeposit = calculateCostCarAfterPayDeposit(calculateCostCarWithAdditionalExpenses(costCar, bank), deposit);
 
             for (int i = 0; i < bank.getCreditSettings().size(); i++) {
-                    double calculateMonthlyPayment = calculateMonthlyPayment(bank.getCreditSettings().get(i), costCarAfterPayDeposit);
-                    if (wantPay >= calculateMonthlyPayment && bank.getCreditSettings().get(i).getPercentDeposit() == calculatePercentDeposit) {
-                        CreditSettingDTO creditSettingDto = new CreditSettingDTO().convertCreditSettingToDTO(bank.getCreditSettings().get(i), bank.getNameBank());
-                        creditSettingDto.setMonthlyPayment(calculateMonthlyPayment);
-                        creditSettingDtoList.add(creditSettingDto);
-                    }
-
+                double calculateMonthlyPayment = calculateMonthlyPayment(bank.getCreditSettings().get(i), costCarAfterPayDeposit);
+                if (wantPay >= calculateMonthlyPayment && bank.getCreditSettings().get(i).getPercentDeposit() == calculatePercentDeposit) {
+                    CreditSettingDTO creditSettingDto = new CreditSettingDTO().convertCreditSettingToDTO(bank.getCreditSettings().get(i), bank.getNameBank());
+                    creditSettingDto.setMonthlyPayment(calculateMonthlyPayment);
+                    creditSettingDtoList.add(creditSettingDto);
                 }
+
             }
+        }
         return creditSettingDtoList;
     }
 
@@ -89,27 +91,28 @@ public class CalculatorService {
     //    вернуть список всех вариантов кредита по названию автосалона
     private static ArrayList<CreditSetting> autoDealerCreditSettings(String nameAutoDealer) {
         List<CreditSetting> creditSettingList = new ArrayList<>();
-        if (nameAutoDealer.toLowerCase().equals("toyota")) {
-            ToyotaAutoDealer toyotaAutoDealer = new ToyotaAutoDealer();
-            List<Bank> banks = toyotaAutoDealer.getCarDealer().getBanks();
+        AutoDealer autoDealer = null;
+        List<Bank> banks = getBanks(nameAutoDealer);
 
-            for (Bank bank : banks) {
-                for (CreditSetting creditSetting : bank.getCreditSettings()) {
-                    creditSettingList.add(creditSetting);
-                }
-            }
-        }
-        if (nameAutoDealer.toLowerCase().equals("mazda")) {
-            ToyotaAutoDealer toyotaAutoDealer = new ToyotaAutoDealer();
-            List<Bank> banks = toyotaAutoDealer.getCarDealer().getBanks();
-
-            for (Bank bank : banks) {
-                for (CreditSetting creditSetting : bank.getCreditSettings()) {
-                    creditSettingList.add(creditSetting);
-                }
+        for (Bank bank : banks) {
+            for (CreditSetting creditSetting : bank.getCreditSettings()) {
+                creditSettingList.add(creditSetting);
             }
         }
         return (ArrayList<CreditSetting>) creditSettingList;
+    }
+
+    private static List<Bank> getBanks(String nameAutoDealer) {
+        AutoDealer autoDealer;
+        List<Bank> banks = new ArrayList<>();
+        if (nameAutoDealer.toLowerCase().equals("toyota")) {
+            autoDealer = new Toyota();
+            banks = autoDealer.getBankList();
+        } else if (nameAutoDealer.toLowerCase().equals("mazda")) {
+            autoDealer = new Mazda();
+            banks = autoDealer.getBankList();
+        }
+        return banks;
     }
 
     //    Расчитать месячный платеж
@@ -122,11 +125,11 @@ public class CalculatorService {
         return costCar - deposit;
     }
 
-    private static double calculateCostCarWithAdditionalExpenses(Double costCar,Bank bank){
+    private static double calculateCostCarWithAdditionalExpenses(Double costCar, Bank bank) {
         double costCarWithAdditionalExpenses = costCar;
         for (double d : bank.getAdditionalExpenses()) {
-            costCarWithAdditionalExpenses+= (costCar/100)*d;
+            costCarWithAdditionalExpenses += (costCar / 100) * d;
         }
-        return costCarWithAdditionalExpenses+750;
+        return costCarWithAdditionalExpenses + 750;
     }
 }

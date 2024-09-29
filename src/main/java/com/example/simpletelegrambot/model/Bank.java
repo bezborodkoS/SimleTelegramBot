@@ -1,29 +1,17 @@
 package com.example.simpletelegrambot.model;
 
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class Bank {
+
 
     private String nameBank;
 
     private List<CreditSetting> creditSettings;
-
     private List<Double> additionalExpenses;
-
-    public Bank(String nameBank, List<CreditSetting> creditSettings,List<Double> additionalExpenses) {
-        this.nameBank = nameBank;
-        this.creditSettings = creditSettings;
-        this.additionalExpenses = additionalExpenses;
-    }
-
-    public String getNameBank() {
-        return nameBank;
-    }
-
-    public List<CreditSetting> getCreditSettings() {
-        return creditSettings;
-    }
 
     public List<Double> getAdditionalExpenses() {
         return additionalExpenses;
@@ -33,11 +21,20 @@ public class Bank {
         this.additionalExpenses = additionalExpenses;
     }
 
+    public String getNameBank() {
+        return nameBank;
+    }
+
     public void setNameBank(String nameBank) {
         this.nameBank = nameBank;
+    }
+
+    public List<CreditSetting> getCreditSettings() {
+        return creditSettings;
     }
 
     public void setCreditSettings(List<CreditSetting> creditSettings) {
         this.creditSettings = creditSettings;
     }
+
 }

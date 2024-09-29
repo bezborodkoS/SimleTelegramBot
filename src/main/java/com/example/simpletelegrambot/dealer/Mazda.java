@@ -1,21 +1,24 @@
 package com.example.simpletelegrambot.dealer;
 
 import com.example.simpletelegrambot.model.Bank;
-import com.example.simpletelegrambot.model.CarDealer;
 import com.example.simpletelegrambot.model.CreditSetting;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MazdaAutoDealer {
-    private CarDealer carDealer;
+@Component
+public class Mazda extends AutoDealer {
+    public Mazda() {
+        this.nameAutoDealer = "Mazda";
+        this.bankList = banksMazda();
+    }
 
-    public MazdaAutoDealer() {
+    private List<Bank> banksMazda(){
         List<CreditSetting> creditSettingsPrivat = new ArrayList<>();
         List<Double> additionalExpensesPrivat = new ArrayList<>();
         additionalExpensesPrivat.add(2.99);
         additionalExpensesPrivat.add(1.99);
-
 
         creditSettingsPrivat.add(new CreditSetting(24,20,6.5));
         creditSettingsPrivat.add(new CreditSetting(36,20,21.9));
@@ -82,22 +85,24 @@ public class MazdaAutoDealer {
         creditSettingsOshad.add(new CreditSetting(36,70,0.01));
         creditSettingsOshad.add(new CreditSetting(60,70,6.99));
         creditSettingsOshad.add(new CreditSetting(84,70,7.99));
+
         List<Double> additionalExpensesOshad = new ArrayList<>();
         additionalExpensesOshad.add(3.5);
 
+        Bank oshadBank = new Bank();
+        oshadBank.setNameBank("OshadBank");
+        oshadBank.setCreditSettings(creditSettingsOshad);
+        oshadBank.setAdditionalExpenses(additionalExpensesOshad);
+        Bank privatBank = new Bank();
+        privatBank.setNameBank("PrivatBank");
+        privatBank.setCreditSettings(creditSettingsPrivat);
+        privatBank.setAdditionalExpenses(additionalExpensesPrivat);
+        List<Bank> mazdaBanks = new ArrayList<>();
+        mazdaBanks.add(privatBank);
+        mazdaBanks.add(oshadBank);
+        return  mazdaBanks;
 
-
-        Bank oshad = new Bank("OshadBank",creditSettingsOshad,additionalExpensesOshad);
-        Bank privat = new Bank("PrivatBank",creditSettingsPrivat,additionalExpensesPrivat);
-        ArrayList<Bank> banks = new ArrayList<>();
-        banks.add(privat);
-        banks.add(oshad);
-        this.carDealer = new CarDealer(null,null);
-        this.carDealer.setNameCarDealer("mazda");
-        this.carDealer.setBanks(banks);
     }
 
-    public CarDealer getCarDealer() {
-        return carDealer;
-    }
+
 }
