@@ -1,26 +1,90 @@
 package com.example.simpletelegrambot.service;
 
 
-import com.example.simpletelegrambot.dealer.AutoDealer;
-import com.example.simpletelegrambot.dealer.Mazda;
-import com.example.simpletelegrambot.dealer.Toyota;
+import com.example.simpletelegrambot.dealer.*;
 import com.example.simpletelegrambot.dto.CreditSettingDTO;
 import com.example.simpletelegrambot.model.Bank;
 import com.example.simpletelegrambot.model.CreditSetting;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CalculatorService {
+    private static ArrayList<AutoDealer> autoDealerArrayList() {
+        ArrayList<AutoDealer> autoDealerArrayList = new ArrayList<>();
+        autoDealerArrayList.add(new Mazda());
+        autoDealerArrayList.add(new Toyota());
+        autoDealerArrayList.add(new Kia());
+        autoDealerArrayList.add(new Hyundai());
+        autoDealerArrayList.add(new Ford());
+        autoDealerArrayList.add(new Citroen());
+        return autoDealerArrayList;
+    }
 
-    public ArrayList<String> allSettings(String nameAutoDealer){
+
+    public ArrayList<String> allAutoDealer() {
+        ArrayList<String> allAutoDealerList = new ArrayList<>();
+        allAutoDealerList.add(new Toyota().getNameAutoDealer());
+        allAutoDealerList.add(new Mazda().getNameAutoDealer());
+        allAutoDealerList.add(new Citroen().getNameAutoDealer());
+        allAutoDealerList.add(new Ford().getNameAutoDealer());
+        allAutoDealerList.add(new Hyundai().getNameAutoDealer());
+        allAutoDealerList.add(new Kia().getNameAutoDealer());
+        return allAutoDealerList;
+    }
+
+    //    Передача всех settings для кнопок
+    public ArrayList<String> allSettings(String nameAutoDealer,String nameBank) {
         ArrayList<String> allSettings = new ArrayList<>();
         for (Bank bank : getBanks(nameAutoDealer)) {
-            for (int i = 0; i < bank.getCreditSettings().size(); i++) {
-                allSettings.add(bank.getCreditSettings().get(i).buttonSettings());
+            if (bank.getNameBank().equals(nameBank)) {
+                for (int i = 0; i < bank.getCreditSettings().size(); i++) {
+                    allSettings.add(bank.getCreditSettings().get(i).buttonSettings());
+                }
             }
         }
         return allSettings;
+    }
+
+    public List<String> allBanks (String nameAutoDealer){
+        List<String> banks = new ArrayList<>();
+        for (Bank b : getBanks(nameAutoDealer)) {
+            banks.add(b.getNameBank());
+        }
+        return banks;
+    }
+
+//    allSettings
+    public CreditSettingDTO returnConcreteSetting(int month, int percentDeposit, double percent,String nameBank,String nameAutoDealer,double costCar) {
+
+        return findCreditSetting(month, percentDeposit, percent, nameBank, nameAutoDealer, costCar);
+    }
+
+    private CreditSettingDTO findCreditSetting(int month, int percentDeposit, double percent,String nameBank,String nameAutoDealer, double costCar){
+        List<Bank> bankArrayList = getBanks(nameAutoDealer);
+        CreditSettingDTO creditSettingDTO = new CreditSettingDTO();
+        Bank bank = null;
+        for (Bank b : bankArrayList) {
+            if (b.getNameBank().equals(nameBank)){
+                bank = b;
+            }
+        }
+        for (CreditSetting credit : bank.getCreditSettings()) {
+            if (credit.getMonth()==month&&credit.getPercentDeposit()==percentDeposit&&credit.getPercent()==percent){
+                creditSettingDTO.convertCreditSettingToDTO(credit,bank.getNameBank());
+                double deposit = (costCar/100)*percentDeposit;
+                double costCarAfterPayDeposit = calculateCostCarAfterPayDeposit(calculateCostCarWithAdditionalExpenses(costCar, bank), deposit);
+                double calculateMonthlyPayment = calculateMonthlyPayment(credit, costCarAfterPayDeposit);
+                creditSettingDTO.setCountMonthInYear(month);
+                creditSettingDTO.setNameBank(nameBank);
+                creditSettingDTO.setPercentDeposit(percentDeposit);
+                creditSettingDTO.setPercent(percent);
+                creditSettingDTO.setMonthlyPayment(calculateMonthlyPayment);
+            }
+        }
+
+        return creditSettingDTO;
     }
 
     //    start:  /buyCar
@@ -102,15 +166,16 @@ public class CalculatorService {
         return (ArrayList<CreditSetting>) creditSettingList;
     }
 
+
+    //Возврат списка банка по имени салона
     private static List<Bank> getBanks(String nameAutoDealer) {
         AutoDealer autoDealer;
         List<Bank> banks = new ArrayList<>();
-        if (nameAutoDealer.toLowerCase().equals("toyota")) {
-            autoDealer = new Toyota();
-            banks = autoDealer.getBankList();
-        } else if (nameAutoDealer.toLowerCase().equals("mazda")) {
-            autoDealer = new Mazda();
-            banks = autoDealer.getBankList();
+        for (AutoDealer a : autoDealerArrayList()) {
+            if (nameAutoDealer.toLowerCase().equals(a.getClass().getSimpleName().toLowerCase())) {
+                autoDealer = a;
+                banks = autoDealer.getBankList();
+            }
         }
         return banks;
     }
@@ -132,4 +197,6 @@ public class CalculatorService {
         }
         return costCarWithAdditionalExpenses + 750;
     }
+
+
 }

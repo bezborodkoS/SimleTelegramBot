@@ -3,20 +3,21 @@ package com.example.simpletelegrambot.dto;
 
 import com.example.simpletelegrambot.model.CreditSetting;
 
-public class CreditSettingDTO {
+import java.text.DecimalFormat;
 
+public class CreditSettingDTO {
 
 
     private int countMonthInYear;
     private int percentDeposit;
-    private  double percent;
+    private double percent;
     private double monthlyPayment;
     private String nameBank;
 
     public CreditSettingDTO() {
     }
 
-    public CreditSettingDTO convertCreditSettingToDTO(CreditSetting creditSetting, String nameBank){
+    public CreditSettingDTO convertCreditSettingToDTO(CreditSetting creditSetting, String nameBank) {
         CreditSettingDTO creditSettingDTO = new CreditSettingDTO();
         creditSettingDTO.setCountMonthInYear(creditSetting.getMonth());
         creditSettingDTO.setPercentDeposit(creditSetting.getPercentDeposit());
@@ -26,7 +27,7 @@ public class CreditSettingDTO {
         return creditSettingDTO;
     }
 
-    public CreditSetting convertDTOToCreditSetting(CreditSettingDTO creditSettingDTO){
+    public CreditSetting convertDTOToCreditSetting(CreditSettingDTO creditSettingDTO) {
         CreditSetting creditSetting = new CreditSetting();
         creditSetting.setMonth(creditSettingDTO.getCountMonthInYear());
         creditSetting.setPercentDeposit(creditSettingDTO.getPercentDeposit());
@@ -77,25 +78,11 @@ public class CreditSettingDTO {
 
     @Override
     public String toString() {
-        return "TransformationToObj{" +
-                "Количество месяцев=" + countMonthInYear +
-                ", Разовая оплата от общей стоимости автомобиля=" + percentDeposit +
-                ", Процентная ставка в месяц=" + percent +
-                ", ежемесячный платеж=" + monthlyPayment +
-                ", банк='" + nameBank +
-                '}';
+        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        return "Банк:" + nameBank +
+                "\nКоличество месяцев=" + countMonthInYear +
+                "\nРазовая оплата от общей стоимости автомобиля=" + percentDeposit +
+                "\nПроцентная ставка в месяц=" + percent +"%"+
+                "\nЕжемесячный платеж=" + decimalFormat.format(monthlyPayment);
     }
-
-
-    //    public TransformationToObj returnTransformation(Year year, double foundPercentDeposit){
-//        TransformationToObj transformationToObj = new TransformationToObj();
-//        for (Map.Entry<Integer, PercentDepositAllPercent> entry: year.getYear().entrySet()){
-//            transformationToObj.setCountMonthInYear(entry.getKey());
-//            for (Map.Entry<Integer, Double> percentDepositAllPercent: entry.getValue().getPercentDepositAllPercent().entrySet()) {
-//                transformationToObj.setPercentDeposit(percentDepositAllPercent.getKey());
-//                transformationToObj.setPercent(percentDepositAllPercent.getValue());
-//            }
-//        }
-//        return transformationToObj;
-//    }
 }
