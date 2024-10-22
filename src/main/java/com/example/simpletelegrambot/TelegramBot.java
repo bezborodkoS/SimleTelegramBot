@@ -1,6 +1,8 @@
 package com.example.simpletelegrambot;
 
-import ch.qos.logback.core.util.TimeUtil;
+import com.example.simpletelegrambot.dto.LaunchPoolDTO;
+import com.example.simpletelegrambot.service.ServerRequestsService;
+import com.example.simpletelegrambot.service.UpdateCashFile;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -15,7 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class TelegramBot extends TelegramLongPollingBot {
     public static final long CHAT_ID_CHANAL = -1002459768052L;
 
-    private  GetMethod getMethod = new GetMethod();
+    private ServerRequestsService serverRequestsService = new ServerRequestsService();
+    private UpdateCashFile updateCashFile = new UpdateCashFile();
     //    private int numb1 = 0;
 //    private int numb2 = 0;
 //    private boolean gameRunning = false;
@@ -54,9 +57,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 //    }
 
     private void showLaunchPool(){
-        List<LaunchPoolDTO> launchPoolDTOList = getMethod.returnBody();
+        List<LaunchPoolDTO> launchPoolDTOList = serverRequestsService.returnBody();
 //        scheduler.scheduleAtFixedRate(this:getLaunchPools(chat_id,launchPoolDTOList), 0,5,TimeUtil.)
-        scheduler.scheduleAtFixedRate(this::getLaunchPools, 0, 10, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(this::getLaunchPools, 0, 30, TimeUnit.SECONDS);
 //        for (LaunchPoolDTO launch : launchPoolDTOList) {
 //            sendMessage(CHAT_ID_CHANAL,launch.poolsShow(launch));
 //        }
@@ -64,10 +67,16 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void getLaunchPools() {
-        launchPoolDTOListShow=getMethod.returnBody();
+        launchPoolDTOListShow= updateCashFile.showLaunchPoolListStartSoon();
         System.out.println("size"+ launchPoolDTOListShow.size());
         for (LaunchPoolDTO launch : launchPoolDTOListShow) {
             sendMessage(CHAT_ID_CHANAL,launch.poolsShow(launch));
+        }
+    }
+
+    private void showLaunchPools(){
+        for (LaunchPoolDTO launch : updateCashFile.showLaunchPoolListStartSoon()) {
+            sendMessage(CHAT_ID_CHANAL, launch.poolsShow(launch));
         }
     }
 
