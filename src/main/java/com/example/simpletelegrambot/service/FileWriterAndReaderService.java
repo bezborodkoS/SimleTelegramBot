@@ -1,7 +1,6 @@
 package com.example.simpletelegrambot.service;
 
 import java.io.*;
-import java.util.List;
 
 public class FileWriterAndReaderService {
 
@@ -22,20 +21,15 @@ public class FileWriterAndReaderService {
     }
 
 
-//    Записывает в файл сколько раз exchange, launchPool, period
+    //    Записывает в файл сколько раз exchange, launchPool, period
     public void writeFile(String simpleLaunchPoolInCash) {
-        String line = null;
+        String line;
         createFile();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(CASH_FILE))) {
-            line = bufferedReader.readLine();
-            if (line==null||line.isEmpty()){
-                line = simpleLaunchPoolInCash;
-            }else if (!line.contains(simpleLaunchPoolInCash)){
-                line = line+", "+simpleLaunchPoolInCash;
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        line = readFile();
+        if (line == null || line.isEmpty()) {
+            line = simpleLaunchPoolInCash;
+        } else if (!line.contains(simpleLaunchPoolInCash)) {
+            line = line + ", " + simpleLaunchPoolInCash;
         }
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(CASH_FILE)) {
@@ -47,14 +41,15 @@ public class FileWriterAndReaderService {
     }
 
 
-//    считывает линию с файла и возрощает ее
+    //    считывает линию с файла и возрощает ее
     public String readFile() {
-        createFile();
         String s = null;
+//        createFile();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(CASH_FILE))) {
-//            if (bufferedReader.readLine()!=null) {
-                s = bufferedReader.readLine();
-//            }
+            s = bufferedReader.readLine();
+            if (s == null) {
+                s = "";
+            }
         } catch (IOException e) {
             System.out.println(e.getMessage() + " read");
         }

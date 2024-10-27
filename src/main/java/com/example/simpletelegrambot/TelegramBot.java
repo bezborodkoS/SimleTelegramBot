@@ -16,15 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TelegramBot extends TelegramLongPollingBot {
     public static final long CHAT_ID_CHANAL = -1002459768052L;
-
-    private ServerRequestsService serverRequestsService = new ServerRequestsService();
     private UpdateCashFile updateCashFile = new UpdateCashFile();
-    //    private int numb1 = 0;
-//    private int numb2 = 0;
-//    private boolean gameRunning = false;
-    private long gameChatId;
-    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private List<LaunchPoolDTO> launchPoolDTOListShow;
 
 
@@ -35,15 +28,8 @@ public class TelegramBot extends TelegramLongPollingBot {
             System.out.println(answer + " answer");
             long chat_id = update.getMessage().getChatId();
             switch (answer.toLowerCase()) {
-//                case "/игра":
-//                    startGame(chat_id);
-//                    break;
-//                case "/стоп":
-//                    stopGame(chat_id);
-//                    break;
                 case "/send":
                     showLaunchPool();
-//                    sendMessage(CHAT_ID_CHANAL, showLaunchPool());
                     break;
                 default:
                     sendMessage(chat_id, answer);
@@ -51,67 +37,33 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-//    private void getLaunchPools(){
-//
-//
-//    }
 
-    private void showLaunchPool(){
-        List<LaunchPoolDTO> launchPoolDTOList = serverRequestsService.returnBody();
-//        scheduler.scheduleAtFixedRate(this:getLaunchPools(chat_id,launchPoolDTOList), 0,5,TimeUtil.)
-        scheduler.scheduleAtFixedRate(this::getLaunchPools, 0, 30, TimeUnit.SECONDS);
-//        for (LaunchPoolDTO launch : launchPoolDTOList) {
-//            sendMessage(CHAT_ID_CHANAL,launch.poolsShow(launch));
-//        }
-
+    private void showLaunchPool() {
+        scheduler.scheduleAtFixedRate(this::showStartSoonLaunchPools, 0, 3, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(this::showActiveLaunchPools, 0, 7,TimeUnit.DAYS);
     }
 
-    private void getLaunchPools() {
-        launchPoolDTOListShow= updateCashFile.showLaunchPoolListStartSoon();
-        System.out.println("size"+ launchPoolDTOListShow.size());
-        for (LaunchPoolDTO launch : launchPoolDTOListShow) {
-            sendMessage(CHAT_ID_CHANAL,launch.poolsShow(launch));
-        }
-    }
-
-    private void showLaunchPools(){
-        for (LaunchPoolDTO launch : updateCashFile.showLaunchPoolListStartSoon()) {
-            sendMessage(CHAT_ID_CHANAL, launch.poolsShow(launch));
+    private void showStartSoonLaunchPools() {
+        launchPoolDTOListShow = updateCashFile.showLaunchPoolListStartSoon();
+        if (launchPoolDTOListShow.size()!=0&& updateCashFile.checkTime()) {
+            for (LaunchPoolDTO launch : launchPoolDTOListShow) {
+                sendMessage(CHAT_ID_CHANAL, launch.poolsShow(launch));
+            }
         }
     }
 
 
-//    private void startGame(long chatId) {
-//        if (!gameRunning) {
-//            gameRunning = true;
-//            gameChatId = chatId;
-//            sendMessage(chatId, "Игра началась! Генерация чисел...");
-//            scheduler.scheduleAtFixedRate(this::sendRandomNumbers, 0, 5, TimeUnit.SECONDS);
-//        } else {
-//            sendMessage(chatId, "Игра уже идет!");
-//        }
-//    }
-//
-//    private void stopGame(long chatId) {
-//        if (gameRunning) {
-//            gameRunning = false;
-//            scheduler.shutdownNow();
-//            String result = (numb1 == numb2) ? "Поздравляю! Числа совпали." : "Поражение. Числа не совпали.";
-//            sendMessage(chatId, result + " Выход на главную.");
-//            scheduler = Executors.newScheduledThreadPool(1);
-//        } else {
-//            sendMessage(chatId, "Игра не идет.");
-//        }
-//    }
-//
-//    private void sendRandomNumbers() {
-//        if (gameRunning) {
-//            numb1 = new SpecialMethods().returnRandomNumb();
-//            numb2 = new SpecialMethods().returnRandomNumb();
-//            String text = numb1 + "               " + numb2;
-//            sendMessage(gameChatId, text);
-//        }
-//    }
+
+    private void showActiveLaunchPools() {
+        if (updateCashFile.showActiveLaunchPools().size()!=0) {
+            sendMessage(CHAT_ID_CHANAL, "Active launch pools");
+            for (LaunchPoolDTO launch : updateCashFile.showActiveLaunchPools()) {
+                sendMessage(CHAT_ID_CHANAL, launch.poolsShow(launch));
+            }
+        }
+    }
+
+
 
     private void sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage();

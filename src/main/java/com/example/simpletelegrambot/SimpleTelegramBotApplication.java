@@ -14,10 +14,10 @@ public class SimpleTelegramBotApplication {
 
         TelegramBot telegramBot = new TelegramBot();
         try {
-            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession. class );
-            botsApi. registerBot(telegramBot);
+            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+            botsApi.registerBot(telegramBot);
         } catch (TelegramApiException e) {
-            e. printStackTrace();
+            e.printStackTrace();
         }
     }
 
